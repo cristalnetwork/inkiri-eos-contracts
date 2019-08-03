@@ -1,7 +1,6 @@
 Inkiri EOS Smart Contracts
 ==========================
 
-# inkiri-eos-contracts #
 EOS Smart Contracts for Inkiri Bank
 
 ## Setup Dev environment ##
@@ -54,3 +53,4 @@ Just run:
 cleos -u http://jungle2.cryptolions.io:80 set account permission youmasteracc active '{"threshold": 1,"keys": [{"key": "YOUR-youmasteracc-PUBLIC-KEY","weight": 1}], "accounts": [{"permission":{"actor":"youmasteracc","permission":"eosio.code"},"weight":1}]}' -p youmasteracc@owner
 ```
 ## Issue InkiriBank Smart Contract ##
+_asap_
