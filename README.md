@@ -53,4 +53,18 @@ Just run:
 cleos -u http://jungle2.cryptolions.io:80 set account permission youmasteracc active '{"threshold": 1,"keys": [{"key": "YOUR-youmasteracc-PUBLIC-KEY","weight": 1}], "accounts": [{"permission":{"actor":"youmasteracc","permission":"eosio.code"},"weight":1}]}' -p youmasteracc@owner
 ```
 ## Issue InkiriBank Smart Contract ##
-_asap_
+Compile contract
+```bash
+cd /yourpath/eos/contracts/inkiribank 
+eosio-cpp inkiribank.cpp -o inkiribank.wasm --abigen
+```
+
+Set contract
+```bash
+cleos -u http://jungle2.cryptolions.io:80 set contract ikmasterooo1 /yourpath/eos/contracts/inkiribank --abi inkiribank.abi -p ikmasterooo1@active
+```
+
+Add a personal account (ikadminoooo1 in this example)
+```bash
+cleos -u http://jungle2.cryptolions.io:80 push action ikmasterooo1 upsertikacc '{"user":"ikadminoooo1", "fee":5, "overdraft":0, "account_type":1, "state":1}' -p ikmasterooo1@active
+```
