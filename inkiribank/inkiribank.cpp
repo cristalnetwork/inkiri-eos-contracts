@@ -1,4 +1,6 @@
 #include <eosio/eosio.hpp>
+#include <eosio/asset.hpp>
+#include "eosio.token.hpp"
 
 using namespace eosio;
 
@@ -12,32 +14,44 @@ class [[eosio::contract("inkiribank")]] inkiribank : public eosio::contract {
   // 		require_auth(get_self());
   // 		ikaccount_type_index account_types(get_self(), get_first_receiver().value);
 		//   auto iterator = account_types.find('personal');
-	//  }
+	 // }
 
-  	// [[eosio::action]]
-	  // void set_overdraft(name user, uint128_t overdraft){
-			// require_auth(get_self());
-		 //  ikaccount_index accounts(get_self(), get_first_receiver().value);
-		 //  auto iterator = accounts.find(user.value);
-	  // 	check(iterator != accounts.end(), "Account does not exist");
-	  // 	// check(accounts.state==1, "Account is disabled");
+  	[[eosio::action]]
+	  void setoverdraft(name user, double overdraft){
+			require_auth(get_self());
+		  ikaccount_index accounts(get_self(), get_first_receiver().value);
+		  auto iterator = accounts.find(user.value);
+	  	check(iterator != accounts.end(), "Account does not exist");
+	  	check(iterator->state!=1, "Account is not enabled");
 
-	  // 	 if(overdraft>0)
-		 //    {
-		 //    	asset quantity = asset( overdraft, symbol_type(S(4, INK)) ); // equals to 1 EOS
+  		// const auto& ikaccount = accounts.get( value.symbol.code().raw(), "no balance object found" );
+  		// eosio_assert( ikaccount->amount >= value.amount, "overdrawn balance" );
 
-			// 		action(
-			// 		    permission_level{ _self, N(active) },
-			// 		    N(ikmasterooo1), N(transfer),
-			// 		    std::make_tuple(_self, user, quantity, string("ovd|create"))
-			// 		).send();
-		 //    }
+	  	 if(overdraft>0.0)
+		    {
+		    	symbol ink_symbol = symbol(symbol_code("INK"), 4);
+					// asset quantity = asset( overdraft, symbolvalue );
+					asset quantity = asset( int64_t(overdraft), ink_symbol );
+					// action(
+					//     permission_level{get_self(), "active"_n},
+					//     N(inkiritoken1), N(transfer),
+					//     std::make_tuple(_self, user, quantity, string("oft|create"))
+					// ).send();
 
-  	// }
+					action(
+		        permission_level{get_self(),"active"_n},
+		        "inkiritoken1"_n,
+		        "issue"_n,
+		        std::make_tuple(_self, user, quantity, string("oft|create"))
+		      ).send();
+
+		    }
+
+  	}
 
   	
   	[[eosio::action]]
-	  void upsertikacc(name user, uint128_t fee, uint128_t overdraft, uint64_t account_type, uint64_t state){
+	  void upsertikacc(name user, double fee, double overdraft, uint64_t account_type, uint64_t state){
 
 		  // require_auth( user );
 		  require_auth(get_self());
@@ -61,16 +75,11 @@ class [[eosio::contract("inkiribank")]] inkiribank : public eosio::contract {
 
 		    send_summary(user, "successfully created inkiri account");
 
-		   //  if(overdraft>0)
-		   //  {
-		   //  	asset quantity = asset( overdraft, symbol_type(S(4, INK)) ); // equals to 1 EOS
-
-					// action(
-					//     permission_level{ _self, N(active) },
-					//     N(ikmasterooo1), N(transfer),
-					//     std::make_tuple(_self, user, quantity, string("ovd|create"))
-					// ).send();
-		   //  }
+		   	if(overdraft>0)
+		   	{
+		   		// setoverdraft(user, overdraft);		
+		   		// send_summary(user, "successfully set overdraft");
+		   	}
 		  }
 		  else {
 		    // update
@@ -119,14 +128,14 @@ class [[eosio::contract("inkiribank")]] inkiribank : public eosio::contract {
     
     struct [[eosio::table]] ikaccount {
       name 					key;
-      uint128_t 		locked_amount;
+      double 				locked_amount;
 	    uint64_t 			deposits_counter;
-	    uint128_t 		withdraw_amount;
+	    double 				withdraw_amount;
 	    uint64_t 			withdraw_counter;
-	    uint128_t 		xchg_amount;
+	    double 				xchg_amount;
 	    uint64_t 			xchg_counter;
-	    uint128_t 	  fee;
-			uint128_t			overdraft;
+	    double 	  		fee;
+			double				overdraft;
       uint64_t  		account_type; 
       /*
 				1 personal
@@ -145,6 +154,32 @@ class [[eosio::contract("inkiribank")]] inkiribank : public eosio::contract {
     };
     typedef eosio::multi_index<"ikaccounts"_n, ikaccount> ikaccount_index;
 
+    struct [[eosio::table]] ikrequest {
+    	uint64_t     	id;
+      name 					user;
+      double 				amount;
+	    uint64_t  		req_type; 
+      /*
+				1 deposit
+				2 withdraw
+				3 foundation
+				4 bank admin
+      */
+
+      uint64_t state;
+			/*
+				1 requested
+				2 pending
+				3 canceled
+				4 done
+      */      
+
+      auto primary_key() const { return id; }
+      uint64_t get_secondary_1() const { return name;}
+    };
+    typedef eosio::multi_index<"ikrequests"_n, ikrequest, indexed_by<"byname"_n, const_mem_fun<ikrequest, name, &ikrequest::get_secondary_1>>> ikrequest_index;
+
+
     void send_summary(name user, std::string message){
       action(
         permission_level{get_self(),"active"_n},
@@ -153,5 +188,4 @@ class [[eosio::contract("inkiribank")]] inkiribank : public eosio::contract {
         std::make_tuple(user, name{user}.to_string() + " " + message)
       ).send();
     }
-
 };
