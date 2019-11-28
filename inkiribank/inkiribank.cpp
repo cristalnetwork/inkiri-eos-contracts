@@ -161,32 +161,6 @@ class [[eosio::contract("inkiribank")]] inkiribank : public eosio::contract {
     };
     typedef eosio::multi_index<"ikaccounts"_n, ikaccount> ikaccount_index;
 
-   //  struct [[eosio::table]] ikrequest {
-   //  	uint64_t     	id;
-   //    name 					user;
-   //    double 				amount;
-	  //   uint64_t  		req_type; 
-   //    /*
-			// 	1 deposit
-			// 	2 withdraw
-			// 	3 foundation
-			// 	4 bank admin
-   //    */
-
-   //    uint64_t state;
-			// /*
-			// 	1 requested
-			// 	2 pending
-			// 	3 canceled
-			// 	4 done
-   //    */      
-
-   //    auto primary_key() const { return id; }
-   //    uint64_t get_secondary_1() const { return name;}
-   //  };
-   //  typedef eosio::multi_index<"ikrequests"_n, ikrequest, indexed_by<"byname"_n, const_mem_fun<ikrequest, name, &ikrequest::get_secondary_1>>> ikrequest_index;
-
-
     void send_summary(name user, std::string message){
       action(
         permission_level{get_self(),"active"_n},
