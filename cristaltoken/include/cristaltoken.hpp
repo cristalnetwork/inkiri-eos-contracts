@@ -185,7 +185,10 @@ namespace eosio {
                         , const uint32_t&       last_charged
                         , const uint32_t&       enabled);
 
-         
+         [[eosio::action]]
+         void erasepap(const name&  account
+                              , const name&       provider
+                              , const uint32_t&   service_id);         
          /**
          * Charge method for @provider to get paid for @service_id provided to @account in the next billable month/period.
          * @account 
@@ -211,6 +214,7 @@ namespace eosio {
          using erasecust_action     = eosio::action_wrapper<"erasecust"_n, &cristaltoken::erasecust>;
 
          using upsertpap_action     = eosio::action_wrapper<"upsertpap"_n, &cristaltoken::upsertpap>;
+         using erasepap_action      = eosio::action_wrapper<"erasepap"_n, &cristaltoken::erasepap>;
          using chargepap_action     = eosio::action_wrapper<"chargepap"_n, &cristaltoken::chargepap>;
 
          using create_action = eosio::action_wrapper<"create"_n, &cristaltoken::create>;
@@ -261,28 +265,58 @@ namespace eosio {
 
           uint32_t        enabled;
           
+          // uint128_t       provider_account;
+          // uint128_t       account_service;
+          // uint128_t       provider_service;
+          // checksum256     account_service_provider;
+
           uint64_t primary_key() const { return id; }
           
-          checksum256 by_account_service_provider() const {
-            return _by_account_service_provider(account, provider, service_id);
+          uint128_t by_provider_account() const {
+            return _by_provider_account(provider, account);
           }
+          static uint128_t _by_provider_account(name provider, name account) {
+
+            return (uint128_t{account.value}<<64) | (uint64_t)provider.value;
+            
+          }
+
+          uint128_t by_account_service() const {
+            return _by_account_service(account, service_id);
+          }
+
+          static uint128_t _by_account_service(name account, uint32_t service_id) {
+
+            return (uint128_t{service_id}<<64) | (uint64_t)account.value;
+            
+          }
+
           uint128_t by_provider_service() const {
             return _by_provider_service(provider, service_id);
           }
           static uint128_t _by_provider_service(name provider, uint32_t service_id) {
-            return (uint128_t{provider.value}<<64) | (uint64_t)service_id;
+            return (uint128_t{service_id}<<64) | (uint64_t)provider.value;
+          }
+
+
+          checksum256 by_account_service_provider() const {
+            return _by_account_service_provider(account, provider, service_id);
           }
           static checksum256 _by_account_service_provider(name account, name provider, uint32_t service_id) {
             return checksum256::make_from_word_sequence<uint64_t>(
-                0ULL, account.value, provider.value, (uint64_t)service_id);
+                0ULL, account.value, provider.value, (uint64_t)service_id
+              );
           }
           // EOSLIB_SERIALIZE( pap, ( id )( account )( provider )( service_id ) )
         };
 
+
         typedef eosio::multi_index<
           "pap"_n, pap,
-          indexed_by<"byall"_n,  const_mem_fun<pap, checksum256, &pap::by_account_service_provider>>,
-          indexed_by<"byprov"_n, const_mem_fun<pap, uint128_t,   &pap::by_provider_service>>
+          indexed_by<"byall"_n,       const_mem_fun<pap, checksum256, &pap::by_account_service_provider>>,
+          indexed_by<"byprovserv"_n,  const_mem_fun<pap, uint128_t,   &pap::by_provider_service>>,
+          indexed_by<"byprovacc"_n,   const_mem_fun<pap, uint128_t,   &pap::by_provider_account>>,
+          indexed_by<"byaccserv"_n,   const_mem_fun<pap, uint128_t,   &pap::by_account_service>>
           >
           paps;
 

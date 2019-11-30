@@ -161,17 +161,23 @@ namespace eosio {
   {
 
       // require_auth(get_self());
-      customers idx(get_self(), get_first_receiver().value);
-      auto iter_account = idx.find(account.value);
-      check( iter_account != idx.end(), "Customer account not exists." );
-      auto& iter_account_obj = *iter_account;
-      check( iter_account_obj.state != STATE_ENABLED, "Customer account is not enabled." );
+      customers customers_idx(get_self(), get_first_receiver().value);
+      auto iter_account = customers_idx.find(account.value);
+      check( iter_account != customers_idx.end(), "Customer account not exists." );
+      // auto& iter_account_obj = *iter_account;
+      auto iter_account_obj = iter_account;
+      
+      // std::string _out = std::to_string( iter_account_obj->state );
+      // cout << _out.c_str() ;
 
-      auto iter_provider = idx.find(provider.value);
-      check( iter_provider != idx.end(), "Provider account not exists." );
-      auto& iter_provider_obj = *iter_provider;
-      check( iter_provider_obj.state != STATE_ENABLED, "Provider account is not enabled." );
-      check( iter_provider_obj.account_type != TYPE_ACCOUNT_BUSINESS && iter_provider_obj.account_type != TYPE_ACCOUNT_BANK_ADMIN, "Provider account is not BIZ neither ADMIN." );
+      check( iter_account_obj->state == STATE_ENABLED, "Customer account is not enabled." );
+
+      auto iter_provider = customers_idx.find(provider.value);
+      check( iter_provider != customers_idx.end(), "Provider account not exists." );
+      // auto& iter_provider_obj = *iter_provider;
+      auto iter_provider_obj = iter_provider;
+      check( iter_provider_obj->state == STATE_ENABLED, "Provider account is not enabled." );
+      check( iter_provider_obj->account_type == TYPE_ACCOUNT_BUSINESS || iter_provider_obj->account_type == TYPE_ACCOUNT_BANK_ADMIN, "Provider account is not BIZ neither ADMIN." );
 
       auto idxKey = pap::_by_account_service_provider(account, provider, service_id);
       paps pap_list(get_self(), get_first_receiver().value);
@@ -183,6 +189,7 @@ namespace eosio {
         check(account != provider, "Customer and provider should be different accounts");
 
         pap_list.emplace(get_self(), [&]( auto& row ) {
+          row.id              = pap_list.available_primary_key();
           row.account         = account;
           row.provider        = provider;
           row.service_id      = service_id;
@@ -191,6 +198,12 @@ namespace eosio {
           row.periods         = periods;
           row.last_charged    = 0;
           row.enabled         = STATE_ENABLED;
+
+          // row.provider_account          = row.by_provider_account();
+          // row.account_service           = row.by_account_service();
+          // row.provider_service          = row.by_provider_service();
+          // row.account_service_provider  = row.by_account_service_provider();
+
         });
 
       }
@@ -204,7 +217,23 @@ namespace eosio {
       }
 
   }
+  
+  void cristaltoken::erasepap(const name&        account
+                              , const name&       provider
+                              , const uint32_t&   service_id) {
       
+      check( has_auth(get_self()) || has_auth(provider), "Missing required authority of admin or provider");
+
+      auto idxKey = pap::_by_account_service_provider(account, provider, service_id);
+      paps pap_list(get_self(), get_first_receiver().value);
+      auto cidx = pap_list.get_index<"byall"_n>();
+      auto it = cidx.find(idxKey);
+      check( it != cidx.end(), "PAP (Account-Provider-Service) not found");
+
+      cidx.erase(it);
+      // send_summary(user, "Successfully erased inkiri account");
+  }
+
   void cristaltoken::chargepap(const name&        account
                               , const name&       provider
                               , const uint32_t&   service_id)
@@ -220,7 +249,7 @@ namespace eosio {
     check( it != cidx.end(), "PAP (Account-Provider-Service) not found");
     
     auto& pap = *it;
-    check( pap.enabled!=STATE_ENABLED, "PAP is not enabled");
+    check( pap.enabled==STATE_ENABLED, "PAP is not enabled");
 
 
     time_point_sec current_time       = now();
@@ -298,7 +327,7 @@ namespace eosio {
   }
 
 
-  void cristaltoken::upsertcust(const name&          account
+  void cristaltoken::upsertcust(const name&       account
                               , const asset&      fee
                               , const asset&      overdraft
                               , const uint32_t&   account_type
@@ -318,8 +347,9 @@ namespace eosio {
 
       if(overdraft.amount>0)
       {
+        std::string memo = "oft|create";
         SEND_INLINE_ACTION( *this, issue, { {get_self(), "active"_n} },
-                            { account, overdraft, "oft|create" }
+                            { account, overdraft, memo }
         );
       }
     }
@@ -336,7 +366,6 @@ namespace eosio {
     }
   }
 
-  
   void cristaltoken::erasecust(const name& account) {
       require_auth(get_self());
       customers idx(get_self(), get_first_receiver().value);
