@@ -201,6 +201,7 @@ namespace eosio {
          void chargepap(const name&       from
                       , const name&       to
                       , const uint32_t&   service_id
+                      , const asset&      quantity
                       , const string&     memo);
 
          [[eosio::action]]
@@ -209,7 +210,7 @@ namespace eosio {
                           , const asset&      overdraft
                           , const uint32_t&   account_type
                           , const uint32_t&   state
-                          , const string& memo);
+                          , const string&     memo);
          
          [[eosio::action]]
          void erasecust(  const name&   to

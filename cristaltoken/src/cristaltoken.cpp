@@ -190,10 +190,21 @@ namespace eosio {
       if( it == cidx.end())
       {
         require_auth( from );
-        
+
         check(to != from, "Customer and provider should be different accounts");
         check( periods>0, "periods is less than 1" );
 
+
+        auto sym = price.symbol;
+        check( sym.is_valid(), "invalid price symbol name" );
+        stats statstable( get_self(), sym.code().raw() );
+        auto existing = statstable.find( sym.code().raw() );
+        check( existing != statstable.end(), "price token symbol does not exist" );
+        const auto& st = *existing;
+        check( price.is_valid(), "invalid price quantity" );
+        check( price.amount > 0, "must set positive price quantity" );
+        check( price.symbol == st.supply.symbol, "price symbol precision mismatch" );
+        
         pap_list.emplace(get_self(), [&]( auto& row ) {
           row.id              = pap_list.available_primary_key();
           row.account         = from; //account;
@@ -247,11 +258,15 @@ namespace eosio {
   void cristaltoken::chargepap(const name&        from
                               , const name&       to
                               , const uint32_t&   service_id
+                              , const asset&      quantity
                               , const string&     memo) {
       
     check( memo.size() <= 256, "memo has more than 256 bytes" );
     check( has_auth(get_self()) || has_auth(to), "Missing required authority of admin or provider");
 
+    auto sym = quantity.symbol;
+    check( sym.is_valid(), "invalid symbol name" );
+    
     // Check pap exists
     auto idxKey = pap::_by_account_service_provider(from, to, service_id);
     paps pap_list(get_self(), get_first_receiver().value);
@@ -263,6 +278,9 @@ namespace eosio {
     auto& pap = *it;
     
     check( pap.enabled==STATE_ENABLED, "PAP is not enabled");
+    check( quantity.is_valid(), "invalid quantity" );
+    check( quantity.symbol == pap.price.symbol, "symbol mismatch" );
+    check( quantity.amount == pap.price.amount , "quantity differs from agreed price");
 
 
     time_point_sec current_time       = now();
