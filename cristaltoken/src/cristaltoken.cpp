@@ -100,7 +100,8 @@ namespace eosio {
      const auto& from = from_acnts.get( value.symbol.code().raw(), "no balance object found" );
      check( from.balance.amount >= value.amount, "overdrawn balance" );
 
-     from_acnts.modify( from, owner, [&]( auto& a ) {
+     // from_acnts.modify( from, owner, [&]( auto& a ) {
+     from_acnts.modify( from, get_self(), [&]( auto& a ) {
            a.balance -= value;
         });
   }
@@ -110,11 +111,13 @@ namespace eosio {
      accounts to_acnts( get_self(), owner.value );
      auto to = to_acnts.find( value.symbol.code().raw() );
      if( to == to_acnts.end() ) {
-        to_acnts.emplace( ram_payer, [&]( auto& a ){
+        // to_acnts.emplace( ram_payer, [&]( auto& a ){
+        to_acnts.emplace( get_self(), [&]( auto& a ){
           a.balance = value;
         });
      } else {
-        to_acnts.modify( to, same_payer, [&]( auto& a ) {
+        // to_acnts.modify( to, same_payer, [&]( auto& a ) {
+        to_acnts.modify( to, get_self(), [&]( auto& a ) {
           a.balance += value;
         });
      }
@@ -135,6 +138,7 @@ namespace eosio {
      auto it = acnts.find( sym_code_raw );
      if( it == acnts.end() ) {
         acnts.emplace( ram_payer, [&]( auto& a ){
+        // acnts.emplace( get_self(), [&]( auto& a ){
           a.balance = asset{0, symbol};
         });
      }
@@ -157,13 +161,15 @@ namespace eosio {
                         , const uint32_t&       begins_at
                         , const uint32_t&       periods
                         , const uint32_t&       last_charged
-                        , const uint32_t&       enabled)
+                        , const uint32_t&       enabled
+                        , const string& memo)
   {
 
       // require_auth(get_self());
       customers customers_idx(get_self(), get_first_receiver().value);
       auto iter_account = customers_idx.find(account.value);
       check( iter_account != customers_idx.end(), "Customer account not exists." );
+      check( memo.size() <= 256, "memo has more than 256 bytes" );
       // auto& iter_account_obj = *iter_account;
       auto iter_account_obj = iter_account;
       
@@ -187,6 +193,7 @@ namespace eosio {
       {
         require_auth( account );
         check(account != provider, "Customer and provider should be different accounts");
+        check( periods>0, "periods is less than 1" );
 
         pap_list.emplace(get_self(), [&]( auto& row ) {
           row.id              = pap_list.available_primary_key();
@@ -199,10 +206,10 @@ namespace eosio {
           row.last_charged    = 0;
           row.enabled         = STATE_ENABLED;
 
-          // row.provider_account          = row.by_provider_account();
-          // row.account_service           = row.by_account_service();
-          // row.provider_service          = row.by_provider_service();
-          // row.account_service_provider  = row.by_account_service_provider();
+          row.provider_account          = row.by_provider_account();
+          row.account_service           = row.by_account_service();
+          row.provider_service          = row.by_provider_service();
+          row.account_service_provider  = row.by_account_service_provider();
 
         });
 
@@ -212,6 +219,7 @@ namespace eosio {
         check( enabled==STATE_ENABLED || enabled==STATE_BLOCKED, "Invalid enabled argument.");
         // update
         cidx.modify(it, get_self(), [&]( auto& row ) {
+        // cidx.modify(it, same_payer, [&]( auto& row ) {  
           row.enabled           = enabled;
         });
       }
@@ -220,10 +228,12 @@ namespace eosio {
   
   void cristaltoken::erasepap(const name&        account
                               , const name&       provider
-                              , const uint32_t&   service_id) {
+                              , const uint32_t&   service_id
+                              , const string& memo) {
       
       check( has_auth(get_self()) || has_auth(provider), "Missing required authority of admin or provider");
-
+      check( memo.size() <= 256, "memo has more than 256 bytes" );
+      
       auto idxKey = pap::_by_account_service_provider(account, provider, service_id);
       paps pap_list(get_self(), get_first_receiver().value);
       auto cidx = pap_list.get_index<"byall"_n>();
@@ -231,14 +241,14 @@ namespace eosio {
       check( it != cidx.end(), "PAP (Account-Provider-Service) not found");
 
       cidx.erase(it);
-      // send_summary(user, "Successfully erased inkiri account");
   }
 
   void cristaltoken::chargepap(const name&        account
                               , const name&       provider
-                              , const uint32_t&   service_id)
-  {
-    
+                              , const uint32_t&   service_id
+                              , const string& memo) {
+      
+    check( memo.size() <= 256, "memo has more than 256 bytes" );
     check( has_auth(get_self()) || has_auth(provider), "Missing required authority of admin or provider");
 
     // Check pap exists
@@ -267,12 +277,12 @@ namespace eosio {
     
     auto period = pap.last_charged+1;
 
-    check( period <= pap.periods, "Sorry contract has finished");
+    check( period <= pap.periods, "Sorry, contract has ended!");
 
-    std::string memo = "pap|";
-    memo += std::to_string(pap.service_id);
-    memo += "|";
-    memo += std::to_string(period);
+    // std::string memo = "pap|";
+    // memo += std::to_string(pap.service_id);
+    // memo += "|";
+    // memo += std::to_string(period);
 
     // action{
     //   permission_level{get_self(), "active"_n},
@@ -283,12 +293,14 @@ namespace eosio {
     // SEND_INLINE_ACTION( *this, transfer, { {get_self(), "active"_n} },
     //                     { pap.account, pap.provider, pap.price, memo }
     // );
+    
     transfer_impl( pap.account, pap.provider, pap.price, memo );
 
     auto enabled = 1;
     if(period == pap.periods)
       enabled = 0;
     cidx.modify(it, get_self(), [&]( auto& row ) {
+    // cidx.modify(it, same_payer, [&]( auto& row ) {
       row.last_charged = period;
       row.enabled      = enabled; 
     });
@@ -320,7 +332,6 @@ namespace eosio {
     // auto payer = has_auth( to ) ? to : from;
     auto payer = get_self();
 
-    // send_summary(to, "transfer_impl#2"); 
     sub_balance( from, quantity );
     add_balance( to, quantity, payer );
     
@@ -331,7 +342,10 @@ namespace eosio {
                               , const asset&      fee
                               , const asset&      overdraft
                               , const uint32_t&   account_type
-                              , const uint32_t&   state){
+                              , const uint32_t&   state
+                              , const string& memo) {
+      
+    check( memo.size() <= 256, "memo has more than 256 bytes" );
     require_auth(get_self());
     customers idx(get_self(), get_first_receiver().value);
     auto iterator = idx.find(account.value);
@@ -362,25 +376,20 @@ namespace eosio {
         row.account_type      = account_type;
         row.state             = state;
       });
-      // send_summary(user, "successfully updated inkiri account");
     }
   }
 
-  void cristaltoken::erasecust(const name& account) {
-      require_auth(get_self());
-      customers idx(get_self(), get_first_receiver().value);
-      auto iterator = idx.find(account.value);
-      check(iterator != idx.end(), "Account does not exist");
-      idx.erase(iterator);
-      // send_summary(user, "Successfully erased inkiri account");
-    }
+  void cristaltoken::erasecust(const name& account
+                              , const string& memo) {
+      
+    check( memo.size() <= 256, "memo has more than 256 bytes" );
+    require_auth(get_self());
+    customers idx(get_self(), get_first_receiver().value);
+    auto iterator = idx.find(account.value);
+    check(iterator != idx.end(), "Account does not exist");
+    idx.erase(iterator);
+    
+  }
 
-  void cristaltoken::send_summary(const name& user, const string& message){
-      action(
-        permission_level{get_self(),"active"_n},
-        get_self(),
-        "notify"_n,
-        std::make_tuple(user, name{user}.to_string() + " " + message)
-      ).send();
-    }
+  
 } /// namespace eosio

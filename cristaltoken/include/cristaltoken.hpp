@@ -183,12 +183,14 @@ namespace eosio {
                         , const uint32_t&       begins_at
                         , const uint32_t&       periods
                         , const uint32_t&       last_charged
-                        , const uint32_t&       enabled);
+                        , const uint32_t&       enabled
+                        , const string& memo);
 
          [[eosio::action]]
          void erasepap(const name&  account
                               , const name&       provider
-                              , const uint32_t&   service_id);         
+                              , const uint32_t&   service_id
+                              , const string& memo);         
          /**
          * Charge method for @provider to get paid for @service_id provided to @account in the next billable month/period.
          * @account 
@@ -198,17 +200,20 @@ namespace eosio {
          [[eosio::action]]
          void chargepap(const name&  account
                               , const name&       provider
-                              , const uint32_t&   service_id);
+                              , const uint32_t&   service_id
+                              , const string& memo);
 
          [[eosio::action]]
          void upsertcust(const name&          account
                           , const asset&      fee
                           , const asset&      overdraft
                           , const uint32_t&   account_type
-                          , const uint32_t&   state);
+                          , const uint32_t&   state
+                          , const string& memo);
          
          [[eosio::action]]
-         void erasecust(const name& account);
+         void erasecust(const name& account
+                        , const string& memo);
 
          using upsertcust_action    = eosio::action_wrapper<"upsertcust"_n, &cristaltoken::upsertcust>;
          using erasecust_action     = eosio::action_wrapper<"erasecust"_n, &cristaltoken::erasecust>;
@@ -217,12 +222,12 @@ namespace eosio {
          using erasepap_action      = eosio::action_wrapper<"erasepap"_n, &cristaltoken::erasepap>;
          using chargepap_action     = eosio::action_wrapper<"chargepap"_n, &cristaltoken::chargepap>;
 
-         using create_action = eosio::action_wrapper<"create"_n, &cristaltoken::create>;
-         using issue_action = eosio::action_wrapper<"issue"_n, &cristaltoken::issue>;
-         using retire_action = eosio::action_wrapper<"retire"_n, &cristaltoken::retire>;
-         using transfer_action = eosio::action_wrapper<"transfer"_n, &cristaltoken::transfer>;
-         using open_action = eosio::action_wrapper<"open"_n, &cristaltoken::open>;
-         using close_action = eosio::action_wrapper<"close"_n, &cristaltoken::close>;
+         using create_action        = eosio::action_wrapper<"create"_n, &cristaltoken::create>;
+         using issue_action         = eosio::action_wrapper<"issue"_n, &cristaltoken::issue>;
+         using retire_action        = eosio::action_wrapper<"retire"_n, &cristaltoken::retire>;
+         using transfer_action      = eosio::action_wrapper<"transfer"_n, &cristaltoken::transfer>;
+         using open_action          = eosio::action_wrapper<"open"_n, &cristaltoken::open>;
+         using close_action         = eosio::action_wrapper<"close"_n, &cristaltoken::close>;
 
       private:
          
@@ -265,10 +270,10 @@ namespace eosio {
 
           uint32_t        enabled;
           
-          // uint128_t       provider_account;
-          // uint128_t       account_service;
-          // uint128_t       provider_service;
-          // checksum256     account_service_provider;
+          uint128_t       provider_account;
+          uint128_t       account_service;
+          uint128_t       provider_service;
+          checksum256     account_service_provider;
 
           uint64_t primary_key() const { return id; }
           
@@ -277,7 +282,7 @@ namespace eosio {
           }
           static uint128_t _by_provider_account(name provider, name account) {
 
-            return (uint128_t{account.value}<<64) | (uint64_t)provider.value;
+            return (uint128_t{provider.value}<<64) | (uint64_t)account.value;
             
           }
 
@@ -287,7 +292,7 @@ namespace eosio {
 
           static uint128_t _by_account_service(name account, uint32_t service_id) {
 
-            return (uint128_t{service_id}<<64) | (uint64_t)account.value;
+            return (uint128_t{account.value}<<64) | (uint64_t)service_id;
             
           }
 
@@ -295,7 +300,7 @@ namespace eosio {
             return _by_provider_service(provider, service_id);
           }
           static uint128_t _by_provider_service(name provider, uint32_t service_id) {
-            return (uint128_t{service_id}<<64) | (uint64_t)provider.value;
+            return (uint128_t{provider.value}<<64) | (uint64_t)service_id;
           }
 
 
