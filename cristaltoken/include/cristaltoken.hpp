@@ -176,8 +176,8 @@ namespace eosio {
          * @enabled
          */
          [[eosio::action]]
-         void upsertpap(const name&             account
-                        , const name&           provider
+         void upsertpap(const name&             from
+                        , const name&           to
                         , const uint32_t&       service_id
                         , const asset&          price
                         , const uint32_t&       begins_at
@@ -187,10 +187,10 @@ namespace eosio {
                         , const string& memo);
 
          [[eosio::action]]
-         void erasepap(const name&  account
-                              , const name&       provider
-                              , const uint32_t&   service_id
-                              , const string& memo);         
+         void erasepap(const name&        from
+                      , const name&       to
+                      , const uint32_t&   service_id
+                      , const string&     memo);         
          /**
          * Charge method for @provider to get paid for @service_id provided to @account in the next billable month/period.
          * @account 
@@ -198,13 +198,13 @@ namespace eosio {
          * @service_id
          */
          [[eosio::action]]
-         void chargepap(const name&  account
-                              , const name&       provider
-                              , const uint32_t&   service_id
-                              , const string& memo);
+         void chargepap(const name&       from
+                      , const name&       to
+                      , const uint32_t&   service_id
+                      , const string&     memo);
 
          [[eosio::action]]
-         void upsertcust(const name&          account
+         void upsertcust(const name&          to
                           , const asset&      fee
                           , const asset&      overdraft
                           , const uint32_t&   account_type
@@ -212,7 +212,7 @@ namespace eosio {
                           , const string& memo);
          
          [[eosio::action]]
-         void erasecust(const name& account
+         void erasecust(  const name&   to
                         , const string& memo);
 
          using upsertcust_action    = eosio::action_wrapper<"upsertcust"_n, &cristaltoken::upsertcust>;

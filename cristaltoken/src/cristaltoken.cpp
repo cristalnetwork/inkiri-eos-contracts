@@ -154,8 +154,8 @@ namespace eosio {
      acnts.erase( it );
   }
 
-  void cristaltoken::upsertpap(const name&      account
-                        , const name&           provider
+  void cristaltoken::upsertpap(const name&      from
+                        , const name&           to
                         , const uint32_t&       service_id
                         , const asset&          price
                         , const uint32_t&       begins_at
@@ -167,38 +167,37 @@ namespace eosio {
 
       // require_auth(get_self());
       customers customers_idx(get_self(), get_first_receiver().value);
-      auto iter_account = customers_idx.find(account.value);
+      auto iter_account = customers_idx.find(from.value);
+      
       check( iter_account != customers_idx.end(), "Customer account not exists." );
       check( memo.size() <= 256, "memo has more than 256 bytes" );
-      // auto& iter_account_obj = *iter_account;
+      
       auto iter_account_obj = iter_account;
       
-      // std::string _out = std::to_string( iter_account_obj->state );
-      // cout << _out.c_str() ;
-
       check( iter_account_obj->state == STATE_ENABLED, "Customer account is not enabled." );
 
-      auto iter_provider = customers_idx.find(provider.value);
+      auto iter_provider = customers_idx.find(to.value);
       check( iter_provider != customers_idx.end(), "Provider account not exists." );
       // auto& iter_provider_obj = *iter_provider;
       auto iter_provider_obj = iter_provider;
       check( iter_provider_obj->state == STATE_ENABLED, "Provider account is not enabled." );
       check( iter_provider_obj->account_type == TYPE_ACCOUNT_BUSINESS || iter_provider_obj->account_type == TYPE_ACCOUNT_BANK_ADMIN, "Provider account is not BIZ neither ADMIN." );
 
-      auto idxKey = pap::_by_account_service_provider(account, provider, service_id);
+      auto idxKey = pap::_by_account_service_provider(from, to, service_id);
       paps pap_list(get_self(), get_first_receiver().value);
       auto cidx = pap_list.get_index<"byall"_n>();
       auto it = cidx.find(idxKey);
       if( it == cidx.end())
       {
-        require_auth( account );
-        check(account != provider, "Customer and provider should be different accounts");
+        require_auth( from );
+        
+        check(to != from, "Customer and provider should be different accounts");
         check( periods>0, "periods is less than 1" );
 
         pap_list.emplace(get_self(), [&]( auto& row ) {
           row.id              = pap_list.available_primary_key();
-          row.account         = account;
-          row.provider        = provider;
+          row.account         = from; //account;
+          row.provider        = to;   //provider;
           row.service_id      = service_id;
           row.price           = price;
           row.begins_at       = time_point_sec(begins_at);
@@ -215,50 +214,54 @@ namespace eosio {
 
       }
       else {
-        check( has_auth(get_self()) || has_auth(provider), "Missing required authority of admin or provider");
+        
+        check( has_auth(get_self()) || has_auth(to), "Missing required authority of admin or provider");
         check( enabled==STATE_ENABLED || enabled==STATE_BLOCKED, "Invalid enabled argument.");
-        // update
-        cidx.modify(it, get_self(), [&]( auto& row ) {
+        
         // cidx.modify(it, same_payer, [&]( auto& row ) {  
+        cidx.modify(it, get_self(), [&]( auto& row ) {
           row.enabled           = enabled;
         });
       }
 
   }
   
-  void cristaltoken::erasepap(const name&        account
-                              , const name&       provider
+  void cristaltoken::erasepap(const name&         from
+                              , const name&       to
                               , const uint32_t&   service_id
                               , const string& memo) {
       
-      check( has_auth(get_self()) || has_auth(provider), "Missing required authority of admin or provider");
+      check( has_auth(get_self()) || has_auth(to), "Missing required authority of admin or provider");
       check( memo.size() <= 256, "memo has more than 256 bytes" );
       
-      auto idxKey = pap::_by_account_service_provider(account, provider, service_id);
+      auto idxKey = pap::_by_account_service_provider(from, to, service_id);
       paps pap_list(get_self(), get_first_receiver().value);
       auto cidx = pap_list.get_index<"byall"_n>();
       auto it = cidx.find(idxKey);
-      check( it != cidx.end(), "PAP (Account-Provider-Service) not found");
 
+      check( it != cidx.end(), "PAP (Account-Provider-Service) not found");
+      
       cidx.erase(it);
   }
 
-  void cristaltoken::chargepap(const name&        account
-                              , const name&       provider
+  void cristaltoken::chargepap(const name&        from
+                              , const name&       to
                               , const uint32_t&   service_id
-                              , const string& memo) {
+                              , const string&     memo) {
       
     check( memo.size() <= 256, "memo has more than 256 bytes" );
-    check( has_auth(get_self()) || has_auth(provider), "Missing required authority of admin or provider");
+    check( has_auth(get_self()) || has_auth(to), "Missing required authority of admin or provider");
 
     // Check pap exists
-    auto idxKey = pap::_by_account_service_provider(account, provider, service_id);
+    auto idxKey = pap::_by_account_service_provider(from, to, service_id);
     paps pap_list(get_self(), get_first_receiver().value);
     auto cidx = pap_list.get_index<"byall"_n>();
     auto it = cidx.find(idxKey);
+    
     check( it != cidx.end(), "PAP (Account-Provider-Service) not found");
     
     auto& pap = *it;
+    
     check( pap.enabled==STATE_ENABLED, "PAP is not enabled");
 
 
@@ -273,16 +276,12 @@ namespace eosio {
                     + " days remaining";
 
       check( false, err.c_str());
+    
     }
     
     auto period = pap.last_charged+1;
 
     check( period <= pap.periods, "Sorry, contract has ended!");
-
-    // std::string memo = "pap|";
-    // memo += std::to_string(pap.service_id);
-    // memo += "|";
-    // memo += std::to_string(period);
 
     // action{
     //   permission_level{get_self(), "active"_n},
@@ -338,7 +337,7 @@ namespace eosio {
   }
 
 
-  void cristaltoken::upsertcust(const name&       account
+  void cristaltoken::upsertcust(const name&       to
                               , const asset&      fee
                               , const asset&      overdraft
                               , const uint32_t&   account_type
@@ -348,11 +347,11 @@ namespace eosio {
     check( memo.size() <= 256, "memo has more than 256 bytes" );
     require_auth(get_self());
     customers idx(get_self(), get_first_receiver().value);
-    auto iterator = idx.find(account.value);
+    auto iterator = idx.find(to.value);
     if( iterator == idx.end() )
     {
       idx.emplace(get_self(), [&]( auto& row ) {
-        row.key               = account;
+        row.key               = to;
         row.fee               = fee;
         row.overdraft         = overdraft;
         row.account_type      = account_type;
@@ -363,14 +362,14 @@ namespace eosio {
       {
         std::string memo = "oft|create";
         SEND_INLINE_ACTION( *this, issue, { {get_self(), "active"_n} },
-                            { account, overdraft, memo }
+                            { to, overdraft, memo }
         );
       }
     }
     else {
       // update
       idx.modify(iterator, get_self(), [&]( auto& row ) {
-        row.key               = account;
+        // row.key               = to;
         row.fee               = fee;
         row.overdraft         = overdraft; // We should withdraw tokens if new overdraft is minor than old one.
         row.account_type      = account_type;
@@ -379,13 +378,13 @@ namespace eosio {
     }
   }
 
-  void cristaltoken::erasecust(const name& account
+  void cristaltoken::erasecust(const name& to
                               , const string& memo) {
       
     check( memo.size() <= 256, "memo has more than 256 bytes" );
     require_auth(get_self());
     customers idx(get_self(), get_first_receiver().value);
-    auto iterator = idx.find(account.value);
+    auto iterator = idx.find(to.value);
     check(iterator != idx.end(), "Account does not exist");
     idx.erase(iterator);
     
