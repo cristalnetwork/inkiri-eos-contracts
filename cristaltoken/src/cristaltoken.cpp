@@ -216,10 +216,10 @@ namespace eosio {
           row.last_charged    = 0;
           row.enabled         = STATE_ENABLED;
 
-          row.provider_account          = row.by_provider_account();
-          row.account_service           = row.by_account_service();
-          row.provider_service          = row.by_provider_service();
-          row.account_service_provider  = row.by_account_service_provider();
+          // row.provider_account          = row.by_provider_account();
+          // row.account_service           = row.by_account_service();
+          // row.provider_service          = row.by_provider_service();
+          // row.account_service_provider  = row.by_account_service_provider();
 
         });
 

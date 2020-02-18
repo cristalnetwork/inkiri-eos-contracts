@@ -271,10 +271,10 @@ namespace eosio {
 
           uint32_t        enabled;
           
-          uint128_t       provider_account;
-          uint128_t       account_service;
-          uint128_t       provider_service;
-          checksum256     account_service_provider;
+          // uint128_t       provider_account;
+          // uint128_t       account_service;
+          // uint128_t       provider_service;
+          // checksum256     account_service_provider;
 
           uint64_t primary_key() const { return id; }
           
