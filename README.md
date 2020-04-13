@@ -1,3 +1,4 @@
+
 CristalNetwork EOSIO Smart Contracts
 =
 
@@ -22,33 +23,32 @@ This doc will try to guide you through:
   3. You will be able to compile and deploy a Smart Contract.
 
 2. Create 1 (one) account. 
-  1. The guide will use `qwertyasdfgh` as the account name. Please choose a meaningful name because the account name will be the identifier of the contract. Respect this rules:
+  a. The guide will use `qwertyasdfgh` as the account name. Please choose a meaningful name because the account name will be the identifier of the contract. Respect this rules:
     > Can only contain the characters `abcdefghijklmnopqrstuvwxyz12345` (a-z lowercase letters and 1-5 digits).
     > Must start with a letter.
     > 12 character length.
   
-  2. Create a private/public key pair. You can run the following command:
-    ```bash
-    $ cleos create key --to-console
-    Private key: 5Hq2mRUipJ92gwzxqN6fvjg8dvRyhv66guFFqTBKf4sju7q1q4M
-    Public key: EOS7v7pPMDhiNm8LURc4yXoCWZg3otjKYeHqVdpF5dPg925ckebRM
-    ```
-  3. Create the account.
-    - If you are using _testnet_, please folow the next steps:
-      * Go to [monitor.jungletestnet.io](https://monitor.jungletestnet.io/#account) and paste account name and public key 
-    - If you are running a local blockchain instance, run the following command:
-  ```bash
-      $ cleos create account eosio qwertyasdfgh
-      EOS7v7pPMDhiNm8LURc4yXoCWZg3otjKYeHqVdpF5dPg925ckebRM -p eosio@active
+  b. Create a private/public key pair. You can run the following command:
+  ```bash cleos create key --to-console 
+  Private key: 5Hq2mRUipJ92gwzxqN6fvjg8dvRyhv66guFFqTBKf4sju7q1q4M
+  Public key: EOS7v7pPMDhiNm8LURc4yXoCWZg3otjKYeHqVdpF5dPg925ckebRM
   ```
 
-  4. Get some EOS tokens.
+  c. Create the account.
+  - If you are using _testnet_, go to [monitor.jungletestnet.io](https://monitor.jungletestnet.io/#account) and paste account name and public key 
+  - If you are running a local blockchain instance, run the following command:
+```bash
+cleos create account eosio qwertyasdfgh EOS7v7pPMDhiNm8LURc4yXoCWZg3otjKYeHqVdpF5dPg925ckebRM -p eosio@active
+```
+
+3. Get some EOS tokens.
     - If you are using _testnet_, issue money to yout account through [this faucet](https://api.monitor.jungletestnet.io/#faucet).
     - If you are running a local blockchain instance, run the following command:
-  ```bash
+```bash
     $ cleos push action eosio.token issue '[ "qwertyasdfgh", "1000.0000 SYS", "memo" ]' -p eosio@active
-  ```
-  5. Import created account to your local wallet. You can take a look at [this link](https://developers.eos.io/eosio-cleos/reference#cleos-wallet-import) to import created private keys.
+```
+
+4. Import created account to your local wallet. You can take a look at [this link](https://developers.eos.io/eosio-cleos/reference#cleos-wallet-import) to import created private keys.
   ```bash 
     $ cleos wallet import --private-key <PRIVATE_KEY>
   ```
@@ -102,7 +102,7 @@ To create a new token, call  `create`  action with the correct parameters. This 
 ```bash
 cleos push action qwertyasdfgh create '[ "qwertyasdfgh", "1000000000.0000 INK"]' -p qwertyasdfgh@active
 ```
-> Replace INK with your preferred token symbol.
+> Note: replace INK with your preferred token symbol.
 > Reference [https://developers.eos.io/welcome/latest/getting-started/smart-contract-development/deploy-issue-and-transfer-tokens](https://developers.eos.io/welcome/latest/getting-started/smart-contract-development/deploy-issue-and-transfer-tokens)
 
 #### 5. Configure Bank Admin
@@ -167,3 +167,5 @@ constexpr static   uint32_t     TYPE_ACCOUNT_BANK_ADMIN    = 4;
 |----------------|-------------------------------|-----------------------------|
 |EOS|[http://bloks.io](http://bloks.io/)            |[https://jungle.bloks.io](https://jungle.bloks.io/)            |
 |TELOS          |[https://telos.bloks.io](https://telos.bloks.io/)           |[https://telos-test.bloks.io](https://telos-test.bloks.io/)            |
+
+
