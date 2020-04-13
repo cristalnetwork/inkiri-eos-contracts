@@ -159,13 +159,46 @@ constexpr static   uint32_t     TYPE_ACCOUNT_BANK_ADMIN    = 4;
 ```
 > [Source code](https://github.com/cristalnetwork/inkiri-eos-contracts/blob/master/cristaltoken/include/cristaltoken.hpp#L155)
 
+_missing text_
+
+
 ## Account permissions
 > [EOSIO Accounts and Permissions](https://developers.eos.io/welcome/latest/protocol/accounts_and_permissions)
-## Explorers
 
+```mermaid
+graph LR
+A[Personal] -- Authorize --> B((As VIEWER))
+A --> C(??)
+B --> D{Personal2}
+C --> D
+```
+#### Point of Sale (POS/PDV)
+_missing text_
+
+
+## Overdraft
+_missing text_
+
+
+## Pre Authorized Debit / Pre Authorized Payment
+_missing text_
+```mermaid
+sequenceDiagram
+Business ->> Personal: 12 month service X at USD10 from 4/2020?
+Personal-x Business: Ok I Agree!
+Business ->> Admin: Charge month 1 / USD 10 for service X
+Admin-->Business: Checking PAP table...
+Admin ->> Personal: Please, send 10 USD to Business 
+Personal--x Business: USD 10
+```
+
+#### (As a personal account) Authorize business to debit authomatically from my account balance
+_missing text_
+#### (As a business account) Claim PAD
+_missing text_
+
+## Explorers
 |                |MAINNET                          |TESTNET                         |
 |----------------|-------------------------------|-----------------------------|
 |EOS|[http://bloks.io](http://bloks.io/)            |[https://jungle.bloks.io](https://jungle.bloks.io/)            |
 |TELOS          |[https://telos.bloks.io](https://telos.bloks.io/)           |[https://telos-test.bloks.io](https://telos-test.bloks.io/)            |
-
-
