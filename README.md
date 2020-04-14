@@ -1,17 +1,17 @@
-
 CristalNetwork EOSIO Smart Contracts
 =
 
 This is a step by step guide to launch an instance of CristalNetwork Bank DApp.
 The doc will cover both deploying options: 
-  - deploying the Smart Contract on local blockchain and 
+  - deploying the Smart Contract on Local Single-Node Testnet and 
   - deploying the Smart Contract on Jungle Testnet.
 
-> **IMPORTANT note**: If you are going to run a local blockchain you should install and run **Hyperion History API** after installing the node. Please refer to [this link]([https://github.com/eosrio/Hyperion-History-API](https://github.com/eosrio/Hyperion-History-API)) and [this link](https://docs.eosrio.io/install/) for further information.
+> **IMPORTANT note**: If you are going to run a Local Single-Node Testnet you should install and run **Hyperion History API** after installing the node. Please refer to [this link]([https://github.com/eosrio/Hyperion-History-API](https://github.com/eosrio/Hyperion-History-API)) and [this link](https://docs.eosrio.io/install/) for further information.
+> **IMPORTANT note 2**: After releasing this doc I found [this guide about installing and running a Local Single-Node Testnet](https://developers.eos.io/manuals/eos/latest/nodeos/usage/development-environment/local-single-node-testnet).
 
 This doc will try to guide you through:
 1. Setting up the EOSIO dev environment, 
-1. Running local blockchain
+1. Running Local Single-Node Testnet
 1. Creating EOSIO accounts 
 1. Compiling EOSIO Smart Contracts
 1. Deploying Dapp (Smart Contracts for CristalNetwork Bank Instance)
@@ -38,14 +38,14 @@ This doc will try to guide you through:
 
   c. Create the account.
   - If you are using _testnet_, go to [monitor.jungletestnet.io](https://monitor.jungletestnet.io/#account) and paste account name and public key 
-  - If you are running a local blockchain instance, run the following command:
+  - If you are running a Local Single-Node Testnet instance, run the following command:
 ```bash
 cleos create account eosio qwertyasdfgh EOS7v7pPMDhiNm8LURc4yXoCWZg3otjKYeHqVdpF5dPg925ckebRM -p eosio@active
 ```
 
 3. Get some EOS tokens.
     - If you are using _testnet_, issue money to yout account through [this faucet](https://api.monitor.jungletestnet.io/#faucet).
-    - If you are running a local blockchain instance, run the following command:
+    - If you are running a Local Single-Node Testnet instance, run the following command:
 ```bash
     $ cleos push action eosio.token issue '[ "qwertyasdfgh", "1000.0000 SYS", "memo" ]' -p eosio@active
 ```
@@ -127,7 +127,7 @@ Please, create a new account named `bankcustomer`.
   2. Create the account.
     - If you are using _testnet_, please folow the next steps:
       * Go to [monitor.jungletestnet.io](https://monitor.jungletestnet.io/#account) and paste account name and public key 
-    - If you are running a local blockchain instance, run the following command:
+    - If you are running a Local Single-Node Testnet instance, run the following command:
       ```bash
       $ cleos create account eosio bankcustomer
       EOS5tkKVxt8xKZzK9YnR8dpLXUyMivtrCKugmqNdXwX178rrZHBTB -p eosio@active
