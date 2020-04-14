@@ -1,3 +1,5 @@
+
+
 CristalNetwork EOSIO Smart Contracts
 =
 
@@ -19,36 +21,43 @@ This doc will try to guide you through:
 > [EOSIO Intro](https://developers.eos.io/welcome/latest/overview/core_concepts)
 
 ## Setup Dev Environment
-1. Follow EOS tutorial steps from scratch up to point 2.2 at [this link](https://developers.eos.io/eosio-home/docs/10-big-picture). After that step, please check you have achieved:
-  1. Runnig `cleos` at your local machine. 
-  2. You will have a local wallet and several accounts.
-  3. You will be able to compile and deploy a Smart Contract.
+For both deploying the Smart Contract on Local Single-Node Testnet and deploying the Smart Contract on Jungle Testnet, we suggest you to have a local instance of `cleos`.
 
-2. Create 1 (one) account. 
-  a. The guide will use `qwertyasdfgh` as the account name. Please choose a meaningful name because the account name will be the identifier of the contract. Respect this rules:
+1. Follow [this EOS tutorial steps from scratch up to point 2.2](https://developers.eos.io/eosio-home/docs/10-big-picture). After that step, please check you have achieved:
+  a. Runnig `cleos` at your local machine. 
+  b. Having a local wallet and several accounts.
+  c. Being able to compile and deploy a Smart Contract.
+
+
+2. Create 1 (one) admin account. 
+This guide will use `qwertyasdfgh` as the account name. Please choose a meaningful name because the account name will be the identifier of the contract. 
+Respect this rules when choosing an account name:
     > Can only contain the characters `abcdefghijklmnopqrstuvwxyz12345` (a-z lowercase letters and 1-5 digits).
     > Must start with a letter.
     > 12 character length.
   
-  b. Create a private/public key pair. You can run the following command:
+  a. Create a private/public key pair. You can run the following command:
   ```bash cleos create key --to-console 
   Private key: 5Hq2mRUipJ92gwzxqN6fvjg8dvRyhv66guFFqTBKf4sju7q1q4M
   Public key: EOS7v7pPMDhiNm8LURc4yXoCWZg3otjKYeHqVdpF5dPg925ckebRM
   ```
-  c. Create the account.
-  - If you are using _testnet_, go to [monitor.jungletestnet.io](https://monitor.jungletestnet.io/#account) and paste account name and public key 
-  - If you are running a Local Single-Node Testnet instance, run the following command:
-```bash
-cleos create account eosio qwertyasdfgh EOS7v7pPMDhiNm8LURc4yXoCWZg3otjKYeHqVdpF5dPg925ckebRM -p eosio@active
-```
+  b. Create the account.
+  If you are running a Local Single-Node Testnet instance, run the following command:
+  ```bash
+  cleos create account eosio qwertyasdfgh EOS7v7pPMDhiNm8LURc4yXoCWZg3otjKYeHqVdpF5dPg925ckebRM -p eosio@active
+  ```
+  > If you are using **Jungle Testnet**, go to [monitor.jungletestnet.io](https://monitor.jungletestnet.io/#account) and paste account name and public key 
 
 3. Get some EOS tokens.
-    - If you are using _testnet_, issue money to your account through [this faucet](https://api.monitor.jungletestnet.io/#faucet).
+This step is onlye useful if your are using **Jungle Testnet**, otherwise go to the next step.
+[Use this this faucet to issue tokens to your account](https://api.monitor.jungletestnet.io/#faucet).
 
-4. Import created account to your local wallet. You can take a look at [this link](https://developers.eos.io/eosio-cleos/reference#cleos-wallet-import) to import created private keys.
+4. Import created account to your local wallet. 
+Execut this command to import created private keys.
   ```bash 
     $ cleos wallet import --private-key <PRIVATE_KEY>
   ```
+You can take a look at [this link](https://developers.eos.io/eosio-cleos/reference#cleos-wallet-import) to get further information.
 
 ## Compile and deploy Bank's Smart Contract
 
@@ -111,37 +120,36 @@ cleos push action qwertyasdfgh upsertcust '{"to":"qwertyasdfgh", "fee":"0.0000 I
 #### 6.  Add a bank customer and issue some tokens
 The account named `qwertyasdfgh` will now add a new customer to the bank, set an overdraft of "1000.0000 INK", check that balance, and then issue some tokens.
 Please, create a new account named `bankcustomer`.
-* Create account `bankcustomer`
-  1. Create a private/public key pair. You can run the following command:
+##### Create account `bankcustomer`
+1. Create a private/public key pair. You can run the following command:
     ```bash
     $ cleos create key --to-console
     Private key: 5KNzaA3jL69KuGpn3xrdc6b12FfGtEGVqVd94UJKnAjLNTq4CWa
     Public key: EOS5tkKVxt8xKZzK9YnR8dpLXUyMivtrCKugmqNdXwX178rrZHBTB
     ```
-  2. Create the account.
+2. Create the account.
     - If you are using _testnet_, please folow the next steps:
       * Go to [monitor.jungletestnet.io](https://monitor.jungletestnet.io/#account) and paste account name and public key 
     - If you are running a Local Single-Node Testnet instance, run the following command:
-      ```bash
-      $ cleos create account eosio bankcustomer
-      EOS5tkKVxt8xKZzK9YnR8dpLXUyMivtrCKugmqNdXwX178rrZHBTB -p eosio@active
-      ```
-* Add `bankcustomer` as a new customer.
- ```bash
+  ```bash
+  cleos create account eosio bankcustomer EOS5tkKVxt8xKZzK9YnR8dpLXUyMivtrCKugmqNdXwX178rrZHBTB -p eosio@active
+  ```
+#####  Add `bankcustomer` as a new customer.
+```bash
 cleos push action qwertyasdfgh upsertcust '{"to":"bankcustomer", "fee":"5.0000 INK", "overdraft":"1000.0000 INK", "account_type":1, "state":1, "memo":""}' -p qwertyasdfgh@active
- ```
-* Check `bankcustomer` balance.
- ```bash
- cleos get currency balance qwertyasdfgh bankcustomer INK
+```
+##### Check `bankcustomer` balance.
+```bash
+cleos get currency balance qwertyasdfgh bankcustomer INK
 ```
 Expected result: `1000.0000 INK`
-* Issue more tokens to `bankcustomer`.
- ```bash
+##### Issue more tokens to `bankcustomer`.
+```bash
 cleos push action qwertyasdfgh issue '[ "bankcustomer", "99.0000 INK", "deposit.1" ]' -p qwertyasdfgh@active
 ```
-* Check `bankcustomer` balance.
- ```bash
- cleos get currency balance qwertyasdfgh bankcustomer INK
+##### Check `bankcustomer` balance.
+```bash
+cleos get currency balance qwertyasdfgh bankcustomer INK
 ```
 Expected result: `1099.0000 INK`
 
