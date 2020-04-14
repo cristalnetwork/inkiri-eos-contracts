@@ -35,7 +35,6 @@ This doc will try to guide you through:
   Private key: 5Hq2mRUipJ92gwzxqN6fvjg8dvRyhv66guFFqTBKf4sju7q1q4M
   Public key: EOS7v7pPMDhiNm8LURc4yXoCWZg3otjKYeHqVdpF5dPg925ckebRM
   ```
-
   c. Create the account.
   - If you are using _testnet_, go to [monitor.jungletestnet.io](https://monitor.jungletestnet.io/#account) and paste account name and public key 
   - If you are running a Local Single-Node Testnet instance, run the following command:
@@ -45,10 +44,6 @@ cleos create account eosio qwertyasdfgh EOS7v7pPMDhiNm8LURc4yXoCWZg3otjKYeHqVdpF
 
 3. Get some EOS tokens.
     - If you are using _testnet_, issue money to your account through [this faucet](https://api.monitor.jungletestnet.io/#faucet).
-    - If you are running a Local Single-Node Testnet instance, run the following command:
-```bash
-    $ cleos push action eosio.token issue '[ "qwertyasdfgh", "1000.0000 SYS", "memo" ]' -p eosio@active
-```
 
 4. Import created account to your local wallet. You can take a look at [this link](https://developers.eos.io/eosio-cleos/reference#cleos-wallet-import) to import created private keys.
   ```bash 
@@ -83,20 +78,19 @@ make -j4
 ```bash
 cleos wallet unlock --password XXXXXXXXXXXXX
 cleos set account permission qwertyasdfgh active --add-code
-cleos set contract qwertyasdfgh /local_directory_for/cristalnetwork/inkiri-eos-contracts/cristaltoken/build/cristaltoken --abi qwertyasdfgh.abi -p qwertyasdfgh@active
+cleos set contract qwertyasdfgh /local_directory_for/cristalnetwork/inkiri-eos-contracts/cristaltoken/build/cristaltoken --abi cristaltoken.abi -p qwertyasdfgh@active
 ```
 If you are using _testnet_, please run the following command:
 ```bash
 cleos wallet unlock --password XXXXXXXXXXXXX
 cleos -u http://jungle2.cryptolions.io:80 set account permission qwertyasdfgh active --add-code
-cleos -u http://jungle2.cryptolions.io:80 set contract qwertyasdfgh /local_directory_for/cristalnetwork/inkiri-eos-contracts/cristaltoken/build/cristaltoken --abi qwertyasdfgh.abi -p qwertyasdfgh@active
+cleos -u http://jungle2.cryptolions.io:80 set contract qwertyasdfgh /local_directory_for/cristalnetwork/inkiri-eos-contracts/cristaltoken/build/cristaltoken --abi cristaltoken.abi -p qwertyasdfgh@active
 ```
 #### 4. Create the Bank Contract Token
-You may need to buy some RAM. Use this command to accomplish that:
+If you are using _testnet_, you may need to buy some RAM. Use this command to accomplish that:
 ```bash
-cleos system buyram qwertyasdfgh qwertyasdfgh --kbytes 1000
+cleos -u http://jungle2.cryptolions.io:80 system buyram qwertyasdfgh qwertyasdfgh --kbytes 1000
 ```
-> If you are using _testnet_, please append `-u http://jungle2.cryptolions.io:80` after `cleos`.
 
 To create a new token, call  `create`  action with the correct parameters. This action accepts 1 argument, it consists of:
 -   An issuer that is an eosio account. In this case, it's  `qwertyasdfgh`. This issuer will be the one with the authority to call  `issue`  and/or perform other actions such as closing accounts or retiring tokens.
