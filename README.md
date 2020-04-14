@@ -7,6 +7,8 @@ The doc will cover both deploying options:
   - deploying the Smart Contract on local blockchain and 
   - deploying the Smart Contract on Jungle Testnet.
 
+> **IMPORTANT note**: If you are going to run a local blockchain you should install and run **Hyperion History API** after installing the node. Please refer to [this link]([https://github.com/eosrio/Hyperion-History-API](https://github.com/eosrio/Hyperion-History-API)) and [this link](https://docs.eosrio.io/install/) for further information.
+
 This doc will try to guide you through:
 1. Setting up the EOSIO dev environment, 
 1. Running local blockchain
