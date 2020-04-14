@@ -44,7 +44,7 @@ cleos create account eosio qwertyasdfgh EOS7v7pPMDhiNm8LURc4yXoCWZg3otjKYeHqVdpF
 ```
 
 3. Get some EOS tokens.
-    - If you are using _testnet_, issue money to yout account through [this faucet](https://api.monitor.jungletestnet.io/#faucet).
+    - If you are using _testnet_, issue money to your account through [this faucet](https://api.monitor.jungletestnet.io/#faucet).
     - If you are running a Local Single-Node Testnet instance, run the following command:
 ```bash
     $ cleos push action eosio.token issue '[ "qwertyasdfgh", "1000.0000 SYS", "memo" ]' -p eosio@active
