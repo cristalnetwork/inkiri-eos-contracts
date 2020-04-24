@@ -8,7 +8,7 @@ The doc will cover both deploying options:
   - deploying the Smart Contract on Local Single-Node Testnet and 
   - deploying the Smart Contract on Jungle Testnet.
 
-> **IMPORTANT note**: If you are going to run a Local Single-Node Testnet you should install and run **Hyperion History API** after installing the node. Please refer to [this github link](https://github.com/eosrio/Hyperion-History-API) and [this eosrio.io link](https://web.eosrio.io/hyperion/)for further information.
+> **IMPORTANT note**: If you are going to run a Local Single-Node Testnet you should install and run **Hyperion History API** after installing the node. Please refer to [this github link](https://github.com/eosrio/Hyperion-History-API) and [this eosrio.io link](https://web.eosrio.io/hyperion/) for further information.
 > **IMPORTANT note 2**: After releasing this doc I found [this guide about installing and running a Local Single-Node Testnet](https://developers.eos.io/manuals/eos/latest/nodeos/usage/development-environment/local-single-node-testnet).
 
 This doc will try to guide you through:
